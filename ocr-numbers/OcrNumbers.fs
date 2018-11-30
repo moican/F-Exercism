@@ -53,14 +53,17 @@ let hasCorrectSize (input : string list) =
     if input.Length % 4 <> 0 then false
     else List.exists (fun x -> (x |> String.length) % 3 <> 0) input |> not
         
-let convertNumber input =
-    input |> toFontLang |> List.chunkBySize 3 |> List.fold (fun acc x -> acc + matchNumber(x)) ""
-    
+let getFont = fun x -> List.chunkBySize 3 x
+let getNumberLine = fun x -> List.chunkBySize 4 x
+
+let obtainNumberString = fun x -> List.fold (fun acc x -> acc + matchNumber(x)) "" x
+
+let convertNumber input = input |> toFontLang |> getFont |> obtainNumberString
+
+let removeLastChar = fun (x : string) -> x.Substring(0, x.Length - 1)
+
+let obtainNumbersStringsInLine = fun x -> List.fold (fun acc x -> acc + convertNumber(x) + "," ) "" x
+
 let convert (input : string list) = 
     if hasCorrectSize input |> not then None
-    else
-        let strValue = input |> List.chunkBySize 4 |> List.fold (fun acc x -> acc + convertNumber(x) + "," ) "" 
-        strValue.Substring(0, strValue.Length - 1) |> Some
-
-
-
+    else input |> getNumberLine |> obtainNumbersStringsInLine |> removeLastChar |> Some
